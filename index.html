@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chiffreur</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#111a2e;
+      --muted:#9fb0d0;
+      --text:#e8eeff;
+      --line:#263455;
+      --accent:#6aa6ff;
+      --accent2:#7cf0c1;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(106,166,255,.18), transparent 60%),
+                  radial-gradient(900px 700px at 90% 25%, rgba(124,240,193,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      padding:24px;
+    }
+
+    .container{
+      max-width: 1000px;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    header{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    h1{
+      margin:0;
+      font-size: 22px;
+      letter-spacing:.2px;
+    }
+
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size: 14px;
+      line-height:1.4;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: rgba(17,26,46,.92);
+      border:1px solid rgba(38,52,85,.75);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+
+    .card h2{
+      margin:0 0 10px 0;
+      font-size:16px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid rgba(38,52,85,.75);
+      padding:6px 10px;
+      border-radius: 999px;
+      margin-bottom:10px;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 12px;
+      border:1px solid rgba(38,52,85,.75);
+    }
+
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid rgba(38,52,85,.55);
+      vertical-align:top;
+      font-size:13px;
+    }
+
+    th{
+      text-align:left;
+      color:var(--muted);
+      font-weight:600;
+      background: rgba(7,12,22,.35);
+    }
+
+    .mono{
+      font-family:var(--mono);
+      font-size: 12.5px;
+      color:#d8e6ff;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    textarea, input{
+      width:100%;
+      border-radius: 12px;
+      border:1px solid rgba(38,52,85,.75);
+      background: rgba(7,12,22,.35);
+      color: var(--text);
+      padding:12px 12px;
+      outline:none;
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height:1.35;
+    }
+    textarea{ min-height:120px; resize: vertical; }
+    textarea::placeholder, input::placeholder{ color: rgba(159,176,208,.65); }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    button{
+      cursor:pointer;
+      border:none;
+      border-radius: 12px;
+      padding:10px 14px;
+      background: linear-gradient(135deg, rgba(106,166,255,.95), rgba(124,240,193,.85));
+      color: #08101f;
+      font-weight:700;
+      letter-spacing:.2px;
+      transition:.15s ease;
+    }
+
+    button:hover{ transform: translateY(-1px); }
+    button:active{ transform: translateY(0px); }
+    button:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+
+    .btn-ghost{
+      background: transparent;
+      border:1px solid rgba(38,52,85,.75);
+      color: var(--muted);
+      font-weight:600;
+    }
+
+    .output{
+      border:1px solid rgba(38,52,85,.75);
+      background: rgba(7,12,22,.35);
+      border-radius: 12px;
+      padding:12px;
+      min-height: 56px;
+    }
+
+    .hint{
+      color: var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .tag{
+      display:inline-block;
+      font-size:11px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid rgba(38,52,85,.75);
+      color: var(--muted);
+    }
+    .tag.ok{ border-color: rgba(124,240,193,.7); color:#baf7e3; }
+    .tag.bad{ border-color: rgba(255,106,106,.7); color:#ffc3c3; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>CHIFFREUR</h1>
+      <h1>Proposé par Hossam Ouammi</h1>
+      <p class="subtitle">
+        Le chiffrement se fait côté serveur. 
+        L’outil ci-dessous ne permet que <b>CRYPTER</b>.
+      </p>
+    </header>
+
+    <div class="grid">
+      <!-- EXEMPLES -->
+      <section class="card">
+        <div class="pill">📌 Exemples (entrée → sortie) — via API</div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:44%;">Entrée</th>
+              <th>Sortie (Crypter)</th>
+            </tr>
+          </thead>
+          <tbody id="examplesBody"></tbody>
+        </table>
+        <p class="hint" style="margin:10px 0 0;">
+          BTW, le code de chiffrement n’est pas dans le navigateur, so blama t7awl.
+        </p>
+      </section>
+
+      <!-- OUTIL -->
+      <section class="card">
+        <h2>Outil</h2>
+        <div class="hint" style="margin-bottom:10px;">Mode actuel : <span class="tag">Crypter</span></div>
+
+        <textarea id="inputText" placeholder="Écris ton texte à crypter ici..."></textarea>
+
+        <div class="row" style="margin-top:10px;">
+          <button id="encryptBtn">Crypter</button>
+          <button id="clearBtn" class="btn-ghost">Effacer</button>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="hint">Résultat</div>
+          <div class="output mono" id="outputText"></div>
+          <div class="hint" id="apiStatus" style="margin-top:8px;"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- HISTORIQUE -->
+    <section class="card">
+      <div class="row" style="justify-content:space-between;">
+        <h2 style="margin:0;">Historique</h2>
+        <button id="clearHistoryBtn" class="btn-ghost">Vider l’historique</button>
+      </div>
+
+      <div style="margin-top:10px; overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:110px;">Type</th>
+              <th style="width:45%;">Entrée</th>
+              <th>Sortie</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr>
+              <td colspan="3" class="hint">Aucun historique pour le moment.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CHALLENGE -->
+    <section class="card">
+      <h2>Challenge</h2>
+      <p class="hint" style="margin-top:-4px;">
+        Texte chiffré (fourni par l’API). Retrouve la phrase originale.  
+        Si tu réussis, tu verras le script (côté serveur).
+      </p>
+
+      <div class="hint">Texte chiffré</div>
+      <div id="challengeCipher" class="output mono" style="margin-top:8px;"></div>
+
+      <div class="hint" style="margin-top:12px;">Ta réponse (texte déchiffré)</div>
+      <input id="challengeGuess" placeholder="Tape la phrase originale ici..." />
+
+      <div class="row" style="margin-top:10px;">
+        <button id="checkBtn">Vérifier</button>
+        <span id="challengeStatus" class="tag" style="display:none;"></span>
+      </div>
+
+      <div id="scriptWrap" style="display:none; margin-top:12px;">
+        <div class="hint">Script utilisé</div>
+        <div class="output mono" id="scriptText" style="margin-top:8px;"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ===== Helpers =====
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    async function callAPI(payload){
+      const res = await fetch("/api/encryption", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      return await res.json();
+    }
+
+    // ===== UI refs =====
+    const examplesBody = document.getElementById("examplesBody");
+    const inputText = document.getElementById("inputText");
+    const outputText = document.getElementById("outputText");
+    const apiStatus = document.getElementById("apiStatus");
+    const encryptBtn = document.getElementById("encryptBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    const historyBody = document.getElementById("historyBody");
+    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+    const challengeCipher = document.getElementById("challengeCipher");
+    const challengeGuess = document.getElementById("challengeGuess");
+    const checkBtn = document.getElementById("checkBtn");
+    const challengeStatus = document.getElementById("challengeStatus");
+    const scriptWrap = document.getElementById("scriptWrap");
+    const scriptText = document.getElementById("scriptText");
+
+    // ===== History =====
+    function addHistoryRow(input, output){
+      const firstRow = historyBody.querySelector("tr");
+      if(firstRow && firstRow.children.length === 1){
+        historyBody.innerHTML = "";
+      }
+      const tr = document.createElement("tr");
+
+      const tdType = document.createElement("td");
+      tdType.innerHTML = '<span class="tag">Encrypt</span>';
+
+      const tdIn = document.createElement("td");
+      tdIn.className = "mono";
+      tdIn.textContent = input;
+
+      const tdOut = document.createElement("td");
+      tdOut.className = "mono";
+      tdOut.textContent = output;
+
+      tr.appendChild(tdType);
+      tr.appendChild(tdIn);
+      tr.appendChild(tdOut);
+      historyBody.appendChild(tr);
+    }
+
+    clearHistoryBtn.addEventListener("click", () => {
+      historyBody.innerHTML = `<tr><td colspan="3" class="hint">Aucun historique pour le moment.</td></tr>`;
+    });
+
+    // ===== Encrypt only =====
+    encryptBtn.addEventListener("click", async () => {
+      const text = inputText.value ?? "";
+      if(text.trim().length === 0){
+        outputText.textContent = "";
+        return;
+      }
+
+      encryptBtn.disabled = true;
+      apiStatus.textContent = "Traitement…";
+
+      try{
+        const data = await callAPI({ action: "encrypt", text });
+        const result = data.result ?? "";
+        outputText.textContent = result;
+        addHistoryRow(text, result);
+        apiStatus.textContent = "OK";
+      }catch(e){
+        outputText.textContent = "";
+        apiStatus.textContent = "Erreur API. Vérifie /functions/api/encryption.js (route /api/encryption).";
+      }finally{
+        encryptBtn.disabled = false;
+      }
+    });
+
+    clearBtn.addEventListener("click", () => {
+      inputText.value = "";
+      outputText.textContent = "";
+      apiStatus.textContent = "";
+      inputText.focus();
+    });
+
+    // ===== Examples =====
+    const examples = [
+      { label: "1 lettre", input: "a" },
+      { label: "2 lettres", input: "ab" },
+      { label: "1 mot", input: "Bonjour" },
+      { label: "2 mots", input: "Bonjour monde" },
+      { label: "Phrase + ponctuation", input: "Salut, comment ça va ?" },
+      { label: "Avec chiffres/symboles", input: "Test 123! OK." }
+    ];
+
+    async function renderExamples(){
+      examplesBody.innerHTML = "";
+      for(const ex of examples){
+        let out = "";
+        try{
+          const data = await callAPI({ action: "encrypt", text: ex.input });
+          out = data.result ?? "";
+        }catch{
+          out = "(Erreur API)";
+        }
+
+        const tr = document.createElement("tr");
+        const tdIn = document.createElement("td");
+        tdIn.innerHTML = `<div class="hint">${escapeHtml(ex.label)}</div><div class="mono">${escapeHtml(ex.input)}</div>`;
+        const tdOut = document.createElement("td");
+        tdOut.innerHTML = `<div class="mono">${escapeHtml(out)}</div>`;
+        tr.appendChild(tdIn);
+        tr.appendChild(tdOut);
+        examplesBody.appendChild(tr);
+      }
+    }
+
+    // ===== Challenge =====
+    async function loadChallenge(){
+      try{
+        const data = await callAPI({ action: "challenge" });
+        challengeCipher.textContent = data.cipher ?? "(Erreur)";
+      }catch{
+        challengeCipher.textContent = "(Erreur API Challenge)";
+      }
+    }
+
+    function setChallengeTag(type, text){
+      challengeStatus.style.display = "inline-block";
+      challengeStatus.textContent = text;
+      challengeStatus.classList.remove("ok","bad");
+      challengeStatus.classList.add(type);
+    }
+
+    checkBtn.addEventListener("click", async () => {
+      scriptWrap.style.display = "none";
+      const guess = (challengeGuess.value ?? "").trim();
+      if(!guess) return;
+
+      checkBtn.disabled = true;
+      setChallengeTag("tag", "Vérification…");
+
+      try{
+        const data = await callAPI({ action: "verify", guess });
+        if(data.ok){
+          setChallengeTag("ok", "Correct ✅");
+          scriptText.textContent = data.script ?? "(script indisponible)";
+          scriptWrap.style.display = "block";
+        }else{
+          setChallengeTag("bad", "Faux ❌");
+        }
+      }catch{
+        setChallengeTag("bad", "Erreur API");
+      }finally{
+        checkBtn.disabled = false;
+      }
+    });
+
+    // init
+    renderExamples();
+    loadChallenge();
+  </script>
+</body>
+</html>
