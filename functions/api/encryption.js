@@ -42,7 +42,7 @@ export async function onRequestPost(context) {
   }
 
   const CHALLENGE_PLAINTEXT =
-    "Congratulations, U are one of few people who could solve this encryption";
+    "Bravo U are one of few people who could solve this encryption";
   const CHALLENGE_CIPHER = encryptSentence(CHALLENGE_PLAINTEXT);
 
   const REVEAL_SCRIPT = `pivot = number_of_words(sentence)
@@ -75,3 +75,4 @@ function json(data, status = 200) {
     headers: { "content-type": "application/json; charset=utf-8" }
   });
 }
+
