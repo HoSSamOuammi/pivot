@@ -45,11 +45,49 @@ export async function onRequestPost(context) {
     "Bravo U are one of few people who could solve this encryption";
   const CHALLENGE_CIPHER = encryptSentence(CHALLENGE_PLAINTEXT);
 
-  const REVEAL_SCRIPT = `pivot = number_of_words(sentence)
-for each word of length L:
-  for i from 1..L:
-    shift(letter_i) by (pivot + L + i) mod 26
-punctuation preserved; only A-Z/a-z shifted`;
+  const REVEAL_SCRIPT = `export async function onRequestPost(context) {
+  const body = await context.request.json().catch(() => ({}));
+  const action = body.action;
+
+  const TOKEN_RE = /\p{L}+|[^\p{L}]+/gu;
+  const WORD_RE  = /\p{L}+/gu;
+
+  function isAZLetter(ch) {
+    const c = ch.charCodeAt(0);
+    return (c >= 65 && c <= 90) || (c >= 97 && c <= 122);
+  }
+
+  function shiftLetter(ch, shift) {
+    const c = ch.charCodeAt(0);
+    if (c >= 65 && c <= 90) return String.fromCharCode(65 + (c - 65 + shift + 26) % 26);
+    if (c >= 97 && c <= 122) return String.fromCharCode(97 + (c - 97 + shift + 26) % 26);
+    return ch;
+  }
+
+  function countWords(text) {
+    const m = text.match(WORD_RE);
+    return m ? m.length : 0;
+  }
+
+  function encryptSentence(text) {
+    const pivot = countWords(text);
+    const tokens = text.match(TOKEN_RE) || [];
+
+    return tokens.map(tok => {
+      if (tok.match(/^\p{L}+$/u)) {
+        const L = tok.length;
+        let out = "";
+        let i = 1;
+        for (const ch of tok) {
+          out += isAZLetter(ch) ? shiftLetter(ch, pivot + L + i) : ch;
+          i++;
+        }
+        return out;
+      }
+      return tok;
+    }).join("");
+  }
+`;
 
   if (action === "encrypt") {
     const text = String(body.text ?? "");
@@ -75,4 +113,5 @@ function json(data, status = 200) {
     headers: { "content-type": "application/json; charset=utf-8" }
   });
 }
+
 
